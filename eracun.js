@@ -201,6 +201,18 @@ streznik.post('/prijava', function(zahteva, odgovor) {
   
   form.parse(zahteva, function (napaka1, polja, datoteke) {
     var napaka2 = false;
+    var ime = polja.FirstName;
+    var priimek = polja.LastName;
+    var podjetje = polja.Company;
+    var naslov = polja.Address;
+    var kraj = polja.City;
+    var provinca = polja.State;
+    var drzava = polja.Country;
+    var postnaSt = polja.PostalCode;
+    var gsm = polja.Phone;
+    var fax = polja.Fax;
+    var email = polja.Email;
+    
     try {
       var stmt = pb.prepare("\
         INSERT INTO Customer \
@@ -209,23 +221,33 @@ streznik.post('/prijava', function(zahteva, odgovor) {
     	  Phone, Fax, Email, SupportRepId) \
         VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
       //TODO: add fields and finalize
-      //stmt.run("", "", "", "", "", "", "", "", "", "", "", 3); 
-      //stmt.finalize();
+      stmt.run(ime, priimek, podjetje, naslov, kraj, provinca, drzava, postnaSt, gsm, fax, email, 3);
+      stmt.finalize();
     } catch (err) {
       napaka2 = true;
     }
-  
-    odgovor.end();
+    
+    if (napaka2) {
+      var sporoci = "Prišlo je do napake pri registraciji nove stranke. Prosim preverite vnešene podatke in poskusite znova.";
+    } else {
+      sporoci = "Stranka je bila uspešno registrirana.";
+    }
+    
+    vrniStranke(function(napaka1, stranke) {
+      vrniRacune(function(napaka2, racuni) {
+        odgovor.render('prijava', {sporocilo: sporoci, seznamStrank: stranke, seznamRacunov: racuni});  
+      });
+    });
   });
 })
 
 // Prikaz strani za prijavo
 streznik.get('/prijava', function(zahteva, odgovor) {
   vrniStranke(function(napaka1, stranke) {
-      vrniRacune(function(napaka2, racuni) {
-        odgovor.render('prijava', {sporocilo: "", seznamStrank: stranke, seznamRacunov: racuni});  
-      }) 
-    });
+    vrniRacune(function(napaka2, racuni) {
+      odgovor.render('prijava', {sporocilo: "", seznamStrank: stranke, seznamRacunov: racuni});  
+    }) 
+  });
 })
 
 // Prikaz nakupovalne košarice za stranko
