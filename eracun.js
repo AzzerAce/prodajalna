@@ -63,10 +63,14 @@ streznik.get('/', function(zahteva, odgovor) {
     if (napaka)
       odgovor.sendStatus(500);
     else {
+      if (!zahteva.session.stranka) {
+        odgovor.redirect('/prijava');
+      } else {
         for (var i=0; i<vrstice.length; i++)
           vrstice[i].stopnja = davcnaStopnja(vrstice[i].izvajalec, vrstice[i].zanr);
         odgovor.render('seznam', {seznamPesmi: vrstice});
       }
+    }
   })
 })
 
@@ -222,10 +226,10 @@ streznik.post('/prijava', function(zahteva, odgovor) {
 // Prikaz strani za prijavo
 streznik.get('/prijava', function(zahteva, odgovor) {
   vrniStranke(function(napaka1, stranke) {
-      vrniRacune(function(napaka2, racuni) {
-        odgovor.render('prijava', {sporocilo: "", seznamStrank: stranke, seznamRacunov: racuni});  
-      }) 
-    });
+    vrniRacune(function(napaka2, racuni) {
+      odgovor.render('prijava', {sporocilo: "", seznamStrank: stranke, seznamRacunov: racuni});  
+    }) 
+  });
 })
 
 // Prikaz nakupovalne košarice za stranko
