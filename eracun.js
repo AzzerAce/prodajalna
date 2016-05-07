@@ -167,12 +167,13 @@ streznik.post('/izpisiRacunBaza', function(zahteva, odgovor) {
         odgovor.setHeader('content-type', 'text/xml');
         odgovor.render('eslog', {
           vizualiziraj: true,
-          postavkeRacuna: pesmi
+          postavkeRacuna: pesmi,
+          podatki: stranka
         });
       });
     });
   });
-})
+});
 
 // Izpis računa v HTML predstavitvi ali izvorni XML obliki
 streznik.get('/izpisiRacun/:oblika', function(zahteva, odgovor) {
