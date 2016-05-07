@@ -191,7 +191,8 @@ streznik.get('/izpisiRacun/:oblika', function(zahteva, odgovor) {
       odgovor.setHeader('content-type', 'text/xml');
       odgovor.render('eslog', {
         vizualiziraj: zahteva.params.oblika == 'html' ? true : false,
-        postavkeRacuna: pesmi
+        postavkeRacuna: pesmi,
+        podatki: oseba
       })  
     }
   })
@@ -278,13 +279,28 @@ streznik.get('/prijava', function(zahteva, odgovor) {
   });
 })
 
+// Pridobi podatke za stranko s CustomerId-jem
+var strankaIzCustomerId = function(customerId, callback) {
+    pb.all("SELECT Customer.* FROM Customer \
+            WHERE Customer.CustomerId = " + customerId,
+    function(napaka, vrstice) {
+      //console.log(vrstice);
+      if (napaka) callback(false);
+      else callback(vrstice);
+    })
+}
+
+var oseba;
+
 // Prikaz nakupovalne košarice za stranko
 streznik.post('/stranka', function(zahteva, odgovor) {
   var form = new formidable.IncomingForm();
   
   form.parse(zahteva, function (napaka1, polja, datoteke) {
     zahteva.session.stranka = polja.seznamStrank;
-    //console.log(zahteva.session.stranka);
+    strankaIzCustomerId(zahteva.session.stranka, function(podatki) {
+      oseba = podatki;
+    });
     odgovor.redirect('/')
   });
 })
